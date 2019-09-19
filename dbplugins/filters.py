@@ -59,7 +59,8 @@ async def on_snip(event):
                     event.chat_id,
                     snip.reply,
                     reply_to=message_id,
-                    file=media
+                    file=media,
+                    link_preview=False
                 )
                 if event.chat_id not in last_triggered_filters:
                     last_triggered_filters[event.chat_id] = []
