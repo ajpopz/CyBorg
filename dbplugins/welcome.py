@@ -1,8 +1,7 @@
 """Greetings
 Commands:
 .clearwelcome
-.setwelcome <Welcome Message>
-.listwelcome"""
+.setwelcome <Welcome Message>"""
 
 from telethon import events
 from telethon.utils import pack_bot_file_id
@@ -20,10 +19,10 @@ async def _(event):
         user_joined=True,
         user_left=False,
         user_kicked=False,"""
-        if event.user_joined or event.user_added:
+        if event.user_joined:
             if cws.should_clean_welcome:
                 try:
-                    await borg.delete_messages(
+                    await borg.delete_messages(  # pylint:disable=E0602
                         event.chat_id,
                         cws.previous_welcome
                     )
@@ -35,13 +34,7 @@ async def _(event):
             title = chat.title if chat.title else "this chat"
             participants = await event.client.get_participants(chat)
             count = len(participants)
-            msg_o = await event.client.get_messages(
-                entity=Config.PRIVATE_CHANNEL_BOT_API_ID,
-                ids=int(cws.f_mesg_id)
-            )
-            current_saved_welcome_message = msg_o.message
-            file_media = msg_o.media
-            mention = "[{}](tg://user?id={})".format(a_user.first_name, a_user.id)
+            mention = "{} (tg://user?id={})".format(a_user.first_name, a_user.id)
             first = a_user.first_name
             last = a_user.last_name
             if last:
@@ -51,11 +44,11 @@ async def _(event):
             username = f"@{a_user.username}" if a_user.username else mention
             userid = a_user.id
             current_saved_welcome_message = cws.custom_welcome_message
-            mention = "[{}](tg://user?id={})".format(a_user.first_name, a_user.id)
+            mention = "{} (tg://user?id={})".format(a_user.first_name, a_user.id)
             
             current_message = await event.reply(
                 current_saved_welcome_message.format(mention=mention, title=title, count=count, first=first, last=last, fullname=fullname, username=username, userid=userid),
-                file=cws.file_media
+                file=cws.media_file_id
             )
             update_previous_welcome(event.chat_id, current_message.id)
 
@@ -72,7 +65,7 @@ async def _(event):
     else:
         input_str = event.text.split(None, 1)
         add_welcome_setting(event.chat_id, input_str[1], True, 0)
-        await event.edit("Welcome Message saved. ")
+        await event.edit("Welcome note saved. ")
 
 
 @borg.on(admin_cmd("clearwelcome"))  # pylint:disable=E0602
@@ -95,10 +88,9 @@ async def _(event):
     if hasattr(cws, 'custom_welcome_message'):
         await event.edit(
             "Welcome note found. " + \
-        "Your welcome message is `{}`.".format(cws.custom_welcome_message)
+        "Your welcome message is {}.".format(cws.custom_welcome_message)
     )
     else:
         await event.edit(
             "No Welcome Message found"
         )
-         
